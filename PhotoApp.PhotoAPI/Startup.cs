@@ -25,6 +25,9 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Routing;
 using PhotoApp.PhotoAPI.Filters.Exception;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace PhotoApp.PhotoAPI
 {
@@ -34,24 +37,37 @@ namespace PhotoApp.PhotoAPI
         {
             Configuration = configuration;
         }
-
+            
         public IConfiguration Configuration { get; }
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => {
+                opt.RequireHttpsMetadata = false;
+                opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidIssuer = "http://localhost",
+                    ValidAudience = "http://localhost",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("PhotoJwtxTokens.")),
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew =TimeSpan.Zero,
+                };
+            });
             //services.AddControllers(options =>
             //{
             //    options.Filters.Add<UnhandledExceptionFilterAttribute>();
-            //});
+            //});,
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
 
             services.AddDbContext<PhotoDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("PhotoApp.PhotoAPI")));
             services.AddControllers();
+            //    .AddNewtonsoftJson(opt => {
+            //    opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            //} );
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddMvcCore();
             services.AddTransient<IFirmaRepository, FirmaRepository>();
@@ -89,7 +105,7 @@ namespace PhotoApp.PhotoAPI
             
             app.UseRouting();
             //app.UseSession();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

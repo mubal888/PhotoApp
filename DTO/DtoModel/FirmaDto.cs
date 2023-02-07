@@ -17,7 +17,7 @@ namespace DTO.DtoModel
         }
         public class FirmaUser
         {
-            [Required(ErrorMessage = "Firma Boş Geçilemez")]
+            [Range(1, 2147483647, ErrorMessage = "Firma Seçiniz...")]
             public int FirmaID { get; set; }
             public bool Aktif { get; set; }
             [Required(ErrorMessage = "Firma Adı Boş Geçilemez")]
@@ -27,15 +27,18 @@ namespace DTO.DtoModel
             public string UserName { get; set; }
             [Required(ErrorMessage = "Şifre giriniz")]
             public string Password { get; set; }
+            [Compare("Password", ErrorMessage = "Şifre tekrarı şifre ile aynı değil giriniz")]
+            public string Repassword { get; set; }
             [Required(ErrorMessage = "Adı giriniz")]
             public string Ad { get; set; }
             [Required(ErrorMessage = "Soyadı giriniz")]
             public string Soyad { get; set; }
-            [Required(ErrorMessage = "Telefon numarasını giriniz.")]
+            [Phone(ErrorMessage = "Hatalı Telefon numarası.")]
             public string Telefon { get; set; }
+            [EmailAddress(ErrorMessage = "Hatalı mail adresi")]
             public string EMail { get; set; }
             public string Adres { get; set; }
-            [Required(ErrorMessage = "Kullanıcı Tipi Seçiniz")]
+            [Range(1, 10, ErrorMessage = "Kullanıcı Tipi Seçiniz.")]
             public int KullaniciTipID { get; set; }
         }
     }

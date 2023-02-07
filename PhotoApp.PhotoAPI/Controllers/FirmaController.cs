@@ -59,9 +59,9 @@ namespace PhotoApp.PhotoAPI.Controllers
         [FirmaException]
         public  IActionResult GetFirma(int Id)
         {
-            Firma firma = _firmaRepository.GetByID(Id);
+            Firma firma = _firmaRepository.GetByID(Id); 
 
-            var deger = _mapper.Map<FirmaDto.Firma>(firma);
+            var deger = _mapper.Map<FirmaDto.Firma>(firma); 
             ServiceResponse<Firma> response = new ServiceResponse<Firma>
             {
                 Entity = firma,
@@ -83,9 +83,9 @@ namespace PhotoApp.PhotoAPI.Controllers
         [FirmaValidate]
         public IActionResult Post([FromBody] FirmaDto.FirmaUser firmaDto)
         {
-            ServiceResponse<FirmaDto.FirmaUser> responses = new ServiceResponse<FirmaDto.FirmaUser>();
+            ServiceResponse<FirmaDto.FirmaUser> responses = new ServiceResponse<FirmaDto.FirmaUser>(); 
             //List<Firma> firmaListe = _firmaRepository.GetAll().Where(x => x.FirmaAdi == firmaDto.FirmaAdi).ToList();
-            List<Firma> firmaListe = _firmaRepository.GetEx(x => x.FirmaAdi == firmaDto.FirmaAdi);
+            List<Firma> firmaListe = _firmaRepository.GetEx(x => x.FirmaAdi == firmaDto.FirmaAdi); 
             if (firmaListe.Count > 0)
             {
                 responses.HasError = true;

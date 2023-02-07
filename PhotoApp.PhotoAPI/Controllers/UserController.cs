@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DTO.DtoModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PhotoApp.BLL.Entity.Abstract;
 using PhotoApp.DAL.EntityFramework;
@@ -33,6 +34,7 @@ namespace PhotoApp.PhotoAPI.Controllers
         {
             return View();
         }
+        [Authorize(Roles ="Admin")]
         [HttpGet(Name = "GetUser")]
         [UserException]
         public IActionResult GetUser()
@@ -54,6 +56,7 @@ namespace PhotoApp.PhotoAPI.Controllers
         }
 
 
+        [Authorize(Roles ="Admin")]
         [HttpGet("{Id}", Name = "GetUserById")]
         [UserException]
         public IActionResult GetUser(int Id)
@@ -67,6 +70,28 @@ namespace PhotoApp.PhotoAPI.Controllers
                 IsSuccessFul = true
             };
             if (response.Entity == null)
+            {
+                return BadRequest("Kayıt Bulunamadı");
+            }
+            else
+            {
+                return Ok(response);
+            }
+        }
+        [HttpGet, Route("GetUserByFirmaID/{FirmaId}")]
+        [UserException]
+        public IActionResult GetUserByFirmaID(int FirmaId)
+        {
+            List<User> user = _userRepository.GetEx(x => x.FirmaID == FirmaId);
+
+            //List<UserDto.User> deger = _mapper.Map<List<UserDto.User>>(user);
+            ServiceResponse<User> response = new ServiceResponse<User>
+            {
+                Entities = user,
+                IsSuccessFul = true,
+                EntitiesCount = user.Count()
+            };
+            if (response.Entities == null)
             {
                 return BadRequest("Kayıt Bulunamadı");
             }
@@ -92,20 +117,6 @@ namespace PhotoApp.PhotoAPI.Controllers
                 responses.IsSuccessFul = false;
                 return BadRequest(responses);
             }
-            if (userDto.FirmaID == 0)
-            {
-                responses.HasError = true;
-                responses.ErrorsAndWarnings.Add("Firma Seçiniz!");
-                responses.IsSuccessFul = false;
-                return BadRequest(responses);
-            }
-            if (userDto.KullaniciTipID == 0)
-            {
-                responses.HasError = true;
-                responses.ErrorsAndWarnings.Add("Kullanıcı Tipi Seçiniz!");
-                responses.IsSuccessFul = false;
-                return BadRequest(responses);
-            }
             if (userDto.KullaniciTipID == 1)
             {
                 responses.HasError = true;
@@ -113,10 +124,11 @@ namespace PhotoApp.PhotoAPI.Controllers
                 responses.IsSuccessFul = false;
                 return BadRequest(responses);
             }
-        
+            var sifre = Guid.NewGuid().ToString().Split('-')[0];
             User user = _mapper.Map<User>(userDto);
             user.ParentID = _userRepository.GetEx(x => x.FirmaID == userDto.FirmaID && x.KullaniciTipID == 1).Select(y => y.ID).FirstOrDefault();
             user.InsertDate = DateTime.Now;
+            user.Password = sifre;
             _userRepository.Add(user);
 
               
@@ -146,18 +158,26 @@ namespace PhotoApp.PhotoAPI.Controllers
                 response.IsSuccessFul = false;
                 return BadRequest(response);
             }
-
+            List<User> users = _userRepository.GetEx(x => x.UserName == userDto.UserName && x.ID != id);
+            if (users.Count > 0)
+            {
+                response.HasError = true;
+                response.ErrorsAndWarnings.Add("Kullanıcı Adı Bulunmaktadır! Başka Kullanıcı Adı giriniz.!");
+                response.IsSuccessFul = false;
+                return BadRequest(response);
+            }
+            if (user.KullaniciTipID != 1 && userDto.KullaniciTipID != 1)
+            {
+                user.KullaniciTipID = userDto.KullaniciTipID;
+            } 
             user.Aktif = userDto.Aktif;
-            user.ParentID = _userRepository.GetEx(x => x.FirmaID == userDto.FirmaID && x.KullaniciTipID == 1).Select(y => y.ID).FirstOrDefault();
-            user.FirmaID = userDto.FirmaID;
             user.UserName = userDto.UserName;
             user.Password = userDto.Password;
             user.Ad = userDto.Ad;
             user.Soyad = userDto.Soyad;
             user.Telefon = userDto.Telefon;
             user.EMail = userDto.EMail;
-            user.Adres = userDto.Adres;
-            user.KullaniciTipID = userDto.KullaniciTipID;
+            user.Adres = userDto.Adres;            
             user.UpdateDate = DateTime.Now;
           
             _userRepository.Update(user);
