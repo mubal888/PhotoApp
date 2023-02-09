@@ -42,7 +42,6 @@ namespace PhotoApp.BLL.Entity.Base
         {
             return _repository.GetEx(predicate).ToList();
         }
-
         public void Update(User entity)
         {
             _repository.Update(entity);

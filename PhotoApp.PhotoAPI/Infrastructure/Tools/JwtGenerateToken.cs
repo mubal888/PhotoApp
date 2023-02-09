@@ -7,19 +7,20 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PhotoApp.PhotoAPI
+namespace PhotoApp.PhotoAPI.Infrastructure.Tools
 {
     public class JwtGenerateToken
     {
         public string GenerateToken()
         {
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("PhotoJwtxTokens."));
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtTokenDefaults.Key));
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             List<Claim> claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            claims.Add(new Claim(ClaimTypes.Role, "member"));
 
-            JwtSecurityToken token = new JwtSecurityToken(issuer:"http://localhost",claims: claims, audience: "http://localhost",notBefore:DateTime.Now, expires:DateTime.Now.AddMinutes(1),signingCredentials:credentials);
+            JwtSecurityToken token = new JwtSecurityToken(issuer: JwtTokenDefaults.ValidIssuer, claims: claims, audience: JwtTokenDefaults.ValidAudience, notBefore:DateTime.UtcNow, expires:DateTime.UtcNow.AddMinutes(JwtTokenDefaults.Expire),signingCredentials:credentials);
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
 
             

@@ -28,6 +28,7 @@ using PhotoApp.PhotoAPI.Filters.Exception;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using PhotoApp.PhotoAPI.Infrastructure.Tools;
 
 namespace PhotoApp.PhotoAPI
 {
@@ -48,11 +49,12 @@ namespace PhotoApp.PhotoAPI
                 opt.RequireHttpsMetadata = false;
                 opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
-                    ValidIssuer = "http://localhost",
-                    ValidAudience = "http://localhost",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("PhotoJwtxTokens.")),
+                    ValidIssuer = JwtTokenDefaults.ValidIssuer,
+                    ValidAudience = JwtTokenDefaults.ValidAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtTokenDefaults.Key)),
                     ValidateIssuerSigningKey = true,
                     ClockSkew =TimeSpan.Zero,
+                    ValidateLifetime = true,
                 };
             });
             //services.AddControllers(options =>
